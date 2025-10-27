@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Email Settings - TRAFx{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Email Service</h2>
+    <p>Configure the settings for the automated weekly traffic reports.</p>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('email_settings.settings') }}">
+                <div class="mb-3">
+                    <label for="recipient_emails" class="form-label">Recipient Email Addresses (one per line or comma-separated)</label>
+                    <textarea class="form-control" id="recipient_emails" name="recipient_emails" rows="5" required>{{ "\n".join(settings.recipient_emails) if settings.recipient_emails else "" }}</textarea>
+                    <div class="form-text">The email address where the reports will be sent.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="report_frequency" class="form-label">Report Frequency</label>
+                    <select class="form-select" id="report_frequency" name="report_frequency">
+                        <option value="daily" {% if settings.report_frequency == 'daily' %}selected{% endif %}>Daily</option>
+                        <option value="weekly" {% if settings.report_frequency == 'weekly' %}selected{% endif %}>Weekly</option>
+                        <option value="monthly" {% if settings.report_frequency == 'monthly' %}selected{% endif %}>Monthly</option>
+                    </select>
+                </div>
+
+                <div id="day-of-week-group" class="mb-3" style="display: none;">
+                    <label for="day_of_week" class="form-label">Day of the Week</label>
+                    <select class="form-select" id="day_of_week" name="day_of_week">
+                        <option value="0" {% if settings.day_of_week == 0 %}selected{% endif %}>Monday</option>
+                        <option value="1" {% if settings.day_of_week == 1 %}selected{% endif %}>Tuesday</option>
+                        <option value="2" {% if settings.day_of_week == 2 %}selected{% endif %}>Wednesday</option>
+                        <option value="3" {% if settings.day_of_week == 3 %}selected{% endif %}>Thursday</option>
+                        <option value="4" {% if settings.day_of_week == 4 %}selected{% endif %}>Friday</option>
+                        <option value="5" {% if settings.day_of_week == 5 %}selected{% endif %}>Saturday</option>
+                        <option value="6" {% if settings.day_of_week == 6 %}selected{% endif %}>Sunday</option>
+                    </select>
+                </div>
+
+                <div id="day-of-month-group" class="mb-3" style="display: none;">
+                    <label for="day_of_month" class="form-label">Day of the Month</label>
+                    <input type="number" class="form-control" id="day_of_month" name="day_of_month" min="1" max="31" value="{{ settings.day_of_month | default(1) }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="report_time" class="form-label">Time of Day (24-hour format)</label>
+                    <input type="time" class="form-control" id="report_time" name="report_time" value="{{ settings.report_time | default('08:00') }}">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 class="card-title">Send Report Now</h5>
+            <p class="card-text">Click the button below to immediately send a traffic report to the configured recipients.</p>
+            <form method="POST" action="{{ url_for('email_settings.send_now') }}">
+                <button type="submit" class="btn btn-info">Send Report Now</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Email Report Preview</h5>
+            <div class="email-preview" style="border: 1px solid #ddd; padding: 15px; background-color: #f9f9f9;">
+                {{ email_preview_html | safe }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const frequencySelect = document.getElementById('report_frequency');
+        const dayOfWeekGroup = document.getElementById('day-of-week-group');
+        const dayOfMonthGroup = document.getElementById('day-of-month-group');
+
+        function toggleGroups() {
+            const selectedFrequency = frequencySelect.value;
+            if (selectedFrequency === 'weekly') {
+                dayOfWeekGroup.style.display = 'block';
+                dayOfMonthGroup.style.display = 'none';
+            } else if (selectedFrequency === 'monthly') {
+                dayOfWeekGroup.style.display = 'none';
+                dayOfMonthGroup.style.display = 'block';
+            } else {
+                dayOfWeekGroup.style.display = 'none';
+                dayOfMonthGroup.style.display = 'none';
+            }
+        }
+
+        toggleGroups(); // Initial check
+        frequencySelect.addEventListener('change', toggleGroups);
+    });
+</script>
+{% endblock %}

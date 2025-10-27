@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Add New Site</h1>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Site Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ site.name }}" required>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ site.start_date }}" required>
+            </div>
+            <div class="col-md-6">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ site.end_date }}" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="latitude" class="form-label">Latitude</label>
+                <input type="text" class="form-control" id="latitude" name="latitude" value="{{ site.latitude }}">
+            </div>
+            <div class="col-md-6">
+                <label for="longitude" class="form-label">Longitude</label>
+                <input type="text" class="form-control" id="longitude" name="longitude" value="{{ site.longitude }}">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="site_comments" class="form-label">Site Comments</label>
+            <textarea class="form-control" id="site_comments" name="site_comments" rows="3">{{ site.site_comments }}</textarea>
+        </div>
+        <div class="mb-3">
+            <label for="battery_level" class="form-label">Battery Level (%)</label>
+            <input type="number" class="form-control" id="battery_level" name="battery_level" min="0" max="100" value="{{ site.battery_level | default(100) }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="date_increment" class="form-label">Date Increment</label>
+            <select class="form-select" id="date_increment" name="date_increment" required>
+                <option value="bimonthly" {% if site.date_increment == 'bimonthly' %}selected{% endif %}>Bi-Monthly</option>
+                <option value="monthly" {% if site.date_increment == 'monthly' %}selected{% endif %}>Monthly</option>
+                <option value="weekly" {% if site.date_increment == 'weekly' %}selected{% endif %}>Weekly</option>
+                <option value="daily" {% if site.date_increment == 'daily' %}selected{% endif %}>Daily</option>
+            </select>
+        </div>
+        <div class="mb-3" id="counts-section">
+            <label class="form-label">Counts ({{ labels|length }} values)</label>
+            <div class="row" id="counts-container">
+                {% for i in range(labels|length) %}
+                <div class="col-md-2 col-sm-4 col-6 mb-2">
+                    <label for="count_{{ i }}" class="form-label">{{ labels[i] }}</label>
+                    <input type="number" class="form-control count-input" id="count_{{ i }}" name="counts[]" value="{{ site.counts[i] if site.counts|length > i else 0 }}" required {% if i > current_index %}placeholder="Future data will be set to 0"{% endif %}>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Add Site</button>
+        <a href="{{ url_for('manage.manage_list') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateIncrementSelect = document.getElementById('date_increment');
+            const countsContainer = document.getElementById('counts-container');
+            const countsLabel = document.querySelector('#counts-section .form-label');
+
+            dateIncrementSelect.addEventListener('change', function() {
+                const selectedIncrement = this.value;
+                fetch(`/manage/data/get_labels_and_index/${selectedIncrement}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const labels = data.labels;
+                        const current_index = data.current_index;
+                        countsLabel.textContent = `Counts (${labels.length} values)`;
+                        countsContainer.innerHTML = ''; // Clear existing inputs
+
+                        for (let i = 0; i < labels.length; i++) {
+                            const colDiv = document.createElement('div');
+                            colDiv.className = 'col-md-2 col-sm-4 col-6 mb-2';
+
+                            const label = document.createElement('label');
+                            label.htmlFor = `count_${i}`;
+                            label.className = 'form-label';
+                            label.textContent = labels[i];
+
+                            const input = document.createElement('input');
+                            input.type = 'number';
+                            input.className = 'form-control count-input';
+                            input.id = `count_${i}`;
+                            input.name = 'counts[]';
+                            input.value = 0; // Set default value to 0
+                            input.required = true;
+                            if (i > current_index) {
+                                input.placeholder = 'Future data will be set to 0';
+                            }
+
+                            colDiv.appendChild(label);
+                            colDiv.appendChild(input);
+                            countsContainer.appendChild(colDiv);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching labels and index:', error));
+            });
+        });
+    </script>
+{% endblock %}

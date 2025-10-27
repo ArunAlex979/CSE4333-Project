@@ -1,0 +1,23 @@
+**How to Stop (Disable) the Application:**
+
+1.  Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2.  In the navigation menu, go to **App Engine** > **Settings**.
+3.  Click the **Disable application** button.
+4.  This will stop the application from serving traffic. Users will see an error page.
+
+**How to Restart (Re-enable) the Application:**
+
+1.  Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2.  In the navigation menu, go to **App Engine** > **Settings**.
+3.  Click the **Enable application** button.
+
+**How to "Restart" by Deploying a New Version:**
+
+Deploying a new version of your application will effectively restart it. This is the recommended way to update your application and restart it at the same time.
+
+1.  Make any desired changes to your code.
+2.  Run the following command from your project's root directory:
+
+    ```bash
+    gcloud builds submit --config cloudbuild.yaml
+    ```

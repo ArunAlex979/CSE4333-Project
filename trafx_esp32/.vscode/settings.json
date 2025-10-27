@@ -1,0 +1,7 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "files.associations": {
+    "*.c": "c",
+    "queue.h": "c"
+  }
+}

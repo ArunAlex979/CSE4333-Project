@@ -1,0 +1,14 @@
+Flask
+blinker
+click
+colorama
+dnspython
+itsdangerous
+Jinja2
+MarkupSafe
+Werkzeug
+APScheduler
+Flask-APScheduler
+google-cloud-firestore
+gunicorn
+sendgrid

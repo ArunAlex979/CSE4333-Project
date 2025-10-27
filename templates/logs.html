@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Device Logs</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Station Name</th>
+            <th>Event Type</th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.timestamp }}</td>
+            <td>{{ log.station_name }}</td>
+            <td>{{ log.event_type }}</td>
+            <td>
+                {% if log.event_type == 'vehicle_event' %}
+                    Vehicle Count Increment: {{ log.details.vehicle_count_increment }}<br>
+                    Current Total Count: {{ log.details.current_total_count }}
+                {% elif log.event_type == 'reboot' %}
+                    Device Rebooted
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

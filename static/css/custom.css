@@ -1,0 +1,103 @@
+body.mesh-gradient {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+}
+
+body.dark-mode.mesh-gradient {
+    background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+body.dark-mode {
+    background-color: #343a40;
+    color: #f8f9fa;
+}
+
+body.dark-mode .table {
+    color: #f8f9fa;
+}
+
+body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .card {
+    background-color: #454d55;
+    color: #f8f9fa;
+    border-color: #6c757d;
+}
+
+body.dark-mode .form-control {
+    background-color: #343a40;
+    color: #f8f9fa;
+    border-color: #6c757d;
+}
+
+body.dark-mode .form-control:focus {
+    background-color: #343a40;
+    color: #f8f9fa;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.25rem rgba(102, 166, 255, 0.25);
+}
+
+/* Responsive canvas styling */
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.site-thumbnail {
+    width: 50px; /* Increased size */
+    height: 50px; /* Increased size */
+    object-fit: cover;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+.countdown-timer {
+    font-size: 0.8em; /* Smaller font size */
+    color: #6c757d; /* A slightly muted color */
+}
+
+.battery-bar-container {
+    width: 100px; /* Fixed width for the container */
+    height: 10px; /* Fixed height for the bar */
+    background-color: #e0e0e0; /* Grey background for empty part */
+    border-radius: 5px;
+    overflow: hidden; /* Ensures the inner bar stays within bounds */
+    display: inline-block; /* Align with text */
+    margin-left: 10px; /* Spacing from the name */
+    vertical-align: middle;
+}
+
+.battery-bar {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out; /* Smooth transition for width changes */
+}
+
+.battery-info {
+    font-size: 0.8em;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+body.dark-mode .email-preview {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-color: #3e3e3e;
+}

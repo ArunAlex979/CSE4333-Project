@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Trash Bin</h1>
+    <a href="{{ url_for('manage.manage_list') }}" class="btn btn-secondary mb-3">Back to Manage Data</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for site in sites %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ site.name }}</td>
+                <td>
+                    <form action="{{ url_for('manage.manage_restore', id=site.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('Are you sure you want to restore this site?');">Restore</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

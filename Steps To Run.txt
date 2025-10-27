@@ -1,0 +1,115 @@
+# TRAFx System - Steps To Run
+
+This document outlines the steps to set up and run the TRAFx vehicle counting and monitoring system, including the ESP32 firmware, local API, and web interface.
+
+## 1. Prerequisites
+
+Before you begin, ensure you have the following installed and configured:
+
+*   **Python 3.x:** For the web application and local API.
+*   **pip:** Python package installer (usually comes with Python).
+*   **Git:** For cloning the repository.
+*   **MongoDB Atlas Account:** A free tier is sufficient. You'll need your connection string.
+*   **ESP-IDF (Espressif IoT Development Framework):** For compiling and flashing the ESP32 firmware. Follow the official Espressif installation
+             guide for your operating system. This includes setting up the toolchain and environment variables.
+
+## 2. Clone the Repository
+
+First, clone the TRAFx repository to your local machine:
+
+```bash
+git clone <repository_url>
+cd TRAFx
+```
+*(Replace `<repository_url>` with the actual URL of your Git repository)*
+
+## 3. MongoDB Setup
+
+The system uses MongoDB for data storage.
+
+1.  **Create a MongoDB Atlas Cluster:** If you don't have one, create a free tier cluster on MongoDB Atlas.
+2.  **Create a Database User:** Create a database user with read and write access to your cluster.
+3.  **Get Connection String:** Obtain the connection string for your cluster. It will look something like:
+    `mongodb+srv://<username>:<password>@<cluster-name>.mongodb.net/?retryWrites=true&w=majority&appName=TRAFx`
+4.  **Update `app.py` and `local_api.py`:**
+    *   Open `app.py` and `local_api.py`.
+    *   Locate the `MONGO_URI` variable (or `path` variable in `app.py`) and replace the placeholder connection string with your actual MongoDB Atlas connection string.
+    *   Ensure the `DATABASE_NAME` and `COLLECTION_NAME` variables match your desired database and collection names.
+
+## 4. ESP32 Firmware Setup
+
+1.  **Navigate to the ESP32 project directory:**
+    ```bash
+    cd trafx_esp32
+    C:\Users\aruna\esp\v5.5-rc1\esp-idf\export.ps1
+    C:\Users\aruna\esp\v5.5-rc1\esp-idf\install.bat
+    C:\Users\aruna\esp\v5.5-rc1\esp-idf\export.bat
+
+    idf.py set-target esp32      or   idf.py set-target esp32s3
+    ```
+2.  **Configure Wi-Fi Credentials:**
+    *   Run the ESP-IDF configuration tool:
+        ```bash
+        idf.py menuconfig
+        ```
+    *   Navigate to `Component config` -> `Wi-Fi` -> `Wi-Fi (Station)`.
+    *   Set `WiFi SSID` (your Wi-Fi network name) and `WiFi Password` (your Wi-Fi password).
+    *   Save the configuration and exit `menuconfig`.
+3.  **Set the Station ID:**
+    *   Open `main/main.c`.
+    *   Locate the `#define STATION_ID` line.
+    *   Replace `"68e9b597390df31a18fcafea"` with the actual MongoDB `_id` of the station you want this ESP32 to represent. You can get this ID from your MongoDB database after creating a station via the web interface.
+4.  **Build and Flash the Firmware:**
+    *   Ensure your ESP32 is connected to your computer via USB.
+    *   Build the project:
+        ```bash
+        idf.py build
+        ```
+    *   Flash the firmware to the ESP32:
+        ```bash
+        idf.py -p <PORT> flash
+        ```
+        *(Replace `<PORT>` with the serial port of your ESP32, e.g., `COM3` on Windows or `/dev/ttyUSB0` on Linux/macOS)*
+    *   Monitor the serial output (optional, but recommended for debugging):
+        ```bash
+        idf.py -p <PORT> monitor
+        ```
+        *(You should see Wi-Fi connecting, SNTP initializing, and "Reboot ping sent successfully" messages)*
+
+## 5. Python Application Setup
+
+1.  **Navigate back to the root TRAFx directory:**
+    ```bash
+    cd ..
+    ```
+2.  **Install Python Dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  **Run the Local API:**
+    *   Open a new terminal window.
+    *   Run the local API, which handles communication with the ESP32:
+        ```bash
+        python local_api.py
+        ```
+        *(This should start a Flask server, typically on `http://0.0.0.0:5000`)*
+4.  **Run the Web Interface:**
+    *   Open another new terminal window.
+    *   Run the main web application:
+        ```bash
+        python app.py
+        ```
+        *(This should start another Flask server, typically on `http://127.0.0.1:5000` or `http://localhost:5000`)*
+
+## 6. Verification
+
+1.  **Access the Web Interface:** Open your web browser and go to `http://localhost:5000`.
+2.  **Check Device Logs:** Navigate to the "Device Logs" page (there should be a link in the navbar). You should see "reboot" events from your ESP32.
+3.  **Trigger Vehicle Events:** Activate the GPIO pin on your ESP32 (e.g., by connecting it to GND or 3.3V, depending on your configuration).
+4.  **Observe Logs:**
+    *   In the `idf.py monitor` output, you should see "Vehicle detected" messages.
+    *   In the `local_api.py` terminal, you should see "Logged event for..." messages.
+    *   On the "Device Logs" webpage, you should see "vehicle_event" entries appearing.
+5.  **Check Station Data:** On the "Home" page or "Manage Data" page, verify that the vehicle counts are updating for your station.
+
+You are now ready to use the TRAFx system!

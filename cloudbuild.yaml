@@ -1,0 +1,6 @@
+steps:
+- name: 'python'
+  entrypoint: 'pip'
+  args: ['install', '-r', 'requirements.txt', '--user']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['app', 'deploy']

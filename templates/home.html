@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Home</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Sparkline</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for site in sites %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>
+                {{ site.name }}
+                <div class="battery-info">
+                    Battery: {{ site.battery_level }}%
+                    <div class="battery-bar-container">
+                        <div class="battery-bar" style="width: {{ site.battery_level }}%; background-color: {{ 'green' if site.battery_level > 50 else ('orange' if site.battery_level > 20 else 'red') }};"></div>
+                    </div>
+                </div>
+            </td>
+            <td><canvas id="sparkline-{{ site.id }}"></canvas></td>
+            <td>
+                <a href="{{ url_for('site.site_detail', id=site.id) }}" class="btn btn-primary btn-sm">Details</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    const sites = {{ sites | tojson }};
+    const currentYear = new Date().getFullYear();
+
+    function dateToIndex(dateStr, labels) {
+        if (!dateStr) return -1;
+        const dateObj = new Date(dateStr);
+        for (let i = 0; i < labels.length; i++) {
+            let labelToParse = labels[i];
+            const match = labelToParse.match(/\(([^)]+)\)/);
+            if (match && match[1]) labelToParse = match[1];
+            const labelDate = new Date(labelToParse + " " + currentYear);
+            if (labelDate >= dateObj) return i;
+        }
+        return labels.length;
+    }
+
+    function drawSparklines() {
+        sites.forEach(site => {
+            const allCounts = site.counts;
+            const allLabels = site.labels;
+            const current_index = site.current_index;
+
+            let startIndex = dateToIndex(site.start_date, allLabels);
+            let endIndex = dateToIndex(site.end_date, allLabels);
+            if (startIndex === -1) startIndex = 0;
+            if (endIndex === -1) endIndex = allLabels.length - 1;
+            endIndex = Math.min(endIndex, current_index);
+
+            const chartCounts = allLabels.map((_, i) => (i >= startIndex && i <= endIndex) ? allCounts[i] : null);
+            createSparkline(`sparkline-${site.id}`, chartCounts, allLabels);
+        });
+    }
+
+    function updateCountdown() {
+        const now = new Date().getTime();
+        sites.forEach(site => {
+            const element = document.getElementById(`countdown-${site.id}`);
+            if (!element || !site.next_collection_timestamp) return;
+
+            const distance = site.next_collection_timestamp - now;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            element.innerHTML = (distance < 0)
+                ? "Collection Due!"
+                : `Next Collection in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        });
+    }
+
+    function setupCommentToggles() {
+        let currentOpenComments = null;
+        document.querySelectorAll('.comment-icon').forEach(icon => {
+            icon.addEventListener('click', function(e) {
+                e.preventDefault();
+                const siteId = this.dataset.siteId;
+                const container = document.getElementById(`comments-${siteId}`);
+                const site = sites.find(s => s.id == siteId);
+
+                if (currentOpenComments && currentOpenComments !== container) {
+                    currentOpenComments.style.display = 'none';
+                }
+
+                if (container.style.display === 'none') {
+                    container.innerHTML = `<p>${site.site_comments || "No comments available."}</p>`;
+                    container.style.display = 'block';
+                    currentOpenComments = container;
+                } else {
+                    container.style.display = 'none';
+                    currentOpenComments = null;
+                }
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        drawSparklines();
+        setupCommentToggles();
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    });
+</script>
+{% endblock %}

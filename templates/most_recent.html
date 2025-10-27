@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Most Recent Data{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Most Recent Vehicle Counts</h1>
+    <div id="most-recent-data-container"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function fetchMostRecentData() {
+        fetch('/api/most-recent-data')
+            .then(response => response.json())
+            .then(data => {
+                let container = document.getElementById('most-recent-data-container');
+                container.innerHTML = ''; // Clear previous data
+                data.sites.forEach(site => {
+                    let siteDiv = document.createElement('div');
+                    siteDiv.classList.add('card', 'shadow', 'mb-4');
+                    
+                    let cardHeader = document.createElement('div');
+                    cardHeader.classList.add('card-header', 'py-3');
+                    cardHeader.innerHTML = `<h6 class="m-0 font-weight-bold text-primary">${site.name}</h6>`;
+                    siteDiv.appendChild(cardHeader);
+
+                    let cardBody = document.createElement('div');
+                    cardBody.classList.add('card-body');
+                    
+                    let latestCount = site.counts[site.current_index] || 0;
+                    let latestLabel = site.labels[site.current_index] || 'N/A';
+
+                    cardBody.innerHTML = `<p><strong>Latest Count:</strong> ${latestCount}</p><p><strong>Date:</strong> ${latestLabel}</p>`;
+                    siteDiv.appendChild(cardBody);
+
+                    container.appendChild(siteDiv);
+                });
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchMostRecentData();
+        setInterval(fetchMostRecentData, 5000); // Refresh every 5 seconds
+    });
+</script>
+{% endblock %}
