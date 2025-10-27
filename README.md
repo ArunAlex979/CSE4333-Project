@@ -1,73 +1,86 @@
-# TraffiLite Flask App
+# TRAFx - Vehicle Count Data System
 
-TraffiLite is a pared-down vehicle-count dashboard built with Flask.
+This project is a web-based system to display, store, and analyze vehicle detection count data.
 
-## Project Structure
+## Features
 
-```
-traffilite/
-├─ app.py
-├─ data.json
-├─ blueprints/
-│   ├ home.py
-│   ├ site.py
-│   └ manage.py
-├─ templates/
-│   ├ base.html
-│   ├ home.html
-│   ├ site_detail.html
-│   ├ manage_list.html
-│   └ manage_edit.html
-└─ static/
-    ├ js/chart-init.js
-    └ css/custom.css
-```
+*   **Web-based UI:** A user-friendly web interface for managing and visualizing vehicle count data.
+*   **Data Management:** Add, edit, and delete traffic monitoring sites and their associated data.
+*   **Data Visualization:** View traffic trends through charts and graphs.
+*   **Email Reporting:** Receive automated weekly summary reports via email.
+*   **Cloud-native:** Deployed on Google Cloud Platform for scalability and reliability.
+*   **CI/CD:** Automated deployment pipeline using Google Cloud Build.
 
-## Setup and Installation
+## Tech Stack
 
-1.  **Create a virtual environment (if you haven't already):**
+*   **Backend:** Python, Flask
+*   **Frontend:** HTML, CSS, JavaScript, Bootstrap
+*   **Database:** Google Firestore
+*   **Cloud Provider:** Google Cloud Platform (App Engine, Firestore, Cloud Build)
+*   **Email Service:** SendGrid
 
+## Getting Started
+
+To run the application locally, you will need to have Python and `pip` installed. You will also need to have a Google Cloud project with a Firestore database.
+
+1.  **Clone the repository:**
     ```bash
-    python -m venv .venv
+    git clone <repository-url>
     ```
-
-2.  **Activate the virtual environment:**
-
-    *   On Windows:
-
-        ```bash
-        .venv\Scripts\activate
-        ```
-
-    *   On macOS/Linux:
-
-        ```bash
-        source .venv/bin/activate
-        ```
-
-3.  **Install dependencies:**
-
+2.  **Install the dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
-
-## Running the Application
-
-1.  **Ensure your virtual environment is activated.**
-2.  **Run the Flask application:**
-
+3.  **Set up your environment variables:**
+    *   You will need to set up a service account in your Google Cloud project and download the JSON key file.
+    *   Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of your JSON key file.
+    *   Set the `SENDGRID_API_KEY` environment variable to your SendGrid API key.
+4.  **Run the application:**
     ```bash
     python app.py
     ```
 
-    The application will typically run on `http://127.0.0.1:5000/`.
+## Deployment
 
-## Using the Manage Data UI
+The application is deployed to Google App Engine using Google Cloud Build. The deployment process is defined in the `cloudbuild.yaml` file.
 
-1.  Navigate to the "Manage Data" section from the navigation bar or by going to `http://127.0.0.1:5000/manage/data`.
-2.  You will see a list of all vehicle counter sites.
-3.  Click the "Edit" button next to the site you wish to modify.
-4.  On the edit page, you will see a JSON representation of the site's data in a textarea.
-5.  Modify the `name` or `counts` array as needed. Ensure the `counts` array contains exactly 24 numbers.
-6.  Click "Save Changes" to update the data. The changes will be saved to `data.json` and reflected in the dashboard.
-7.  If there are any validation errors (e.g., invalid JSON, incorrect number of counts), an error message will be displayed.
+To deploy the application, run the following command:
+
+```bash
+gcloud builds submit --config cloudbuild.yaml
+```
+
+## API Endpoints
+
+The application exposes the following API endpoints for interacting with the ESP32 devices:
+
+*   `/api/record_vehicle_event` (POST): Records a vehicle count event.
+    *   **Request Body:**
+        ```json
+        {
+            "station_id": "<station-id>",
+            "vehicle_count": <count>
+        }
+        ```
+*   `/api/esp32/reboot` (POST): Records a reboot event.
+    *   **Request Body:**
+        ```json
+        {
+            "station_id": "<station-id>"
+        }
+        ```
+
+## ESP32 Simulation
+
+The `simulate_esp32.py` script can be used to simulate an ESP32 device sending data to the application.
+
+1.  **Install the `requests` library:**
+    ```bash
+    pip install requests
+    ```
+2.  **Get a Station ID:** Go to your application's "Manage Data" page and copy the ID of one of your sites.
+3.  **Update the script:** Open the `simulate_esp32.py` file and replace `'YOUR_STATION_ID'` with the actual station ID you copied.
+4.  **Run the script:**
+    ```bash
+    python simulate_esp32.py
+    ```
