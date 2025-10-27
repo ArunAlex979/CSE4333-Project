@@ -2,7 +2,7 @@ runtime: python312
 entrypoint: gunicorn -b :$PORT app:app
 
 env_variables:
-  SENDGRID_API_KEY: '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'
+  SENDGRID_API_KEY: 'was to chnage HIDDEN_FOR_SECURITY API KEY'
 
 handlers:
 - url: /static
