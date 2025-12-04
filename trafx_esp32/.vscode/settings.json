@@ -2,6 +2,7 @@
   "C_Cpp.intelliSenseEngine": "default",
   "files.associations": {
     "*.c": "c",
-    "queue.h": "c"
+    "queue.h": "c",
+    "esp_log.h": "c"
   }
 }

@@ -1,0 +1,10 @@
+menu "TRAFx Configuration"
+
+    config TRAFX_MODEM_APN
+        string "Modem APN"
+        default "iot.1nce.net"
+        help
+            APN (Access Point Name) for the cellular modem.
+            This is required to establish a GPRS connection.
+
+endmenu

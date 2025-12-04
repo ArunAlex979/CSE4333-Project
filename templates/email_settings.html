@@ -7,6 +7,13 @@
     <h2>Manage Email Service</h2>
     <p>Configure the settings for the automated weekly traffic reports.</p>
 
+    <div class="alert alert-info text-center" role="alert" style="font-size: 1.2em; font-weight: bold;">
+        <p>Email Report Schedule:</p>
+        <p>Frequency: <code>0 3 15,30 * *</code></p>
+        <p>This means reports will be sent at <strong>3:00 AM</strong> on the <strong>15th and 30th of every month</strong>.</p>
+        <p>Please note: This schedule is controlled by Cloud Scheduler and cannot be changed from this page.</p>
+    </div>
+
     <div class="card">
         <div class="card-body">
             <form method="POST" action="{{ url_for('email_settings.settings') }}">
@@ -16,6 +23,7 @@
                     <div class="form-text">The email address where the reports will be sent.</div>
                 </div>
 
+{#
                 <div class="mb-3">
                     <label for="report_frequency" class="form-label">Report Frequency</label>
                     <select class="form-select" id="report_frequency" name="report_frequency">
@@ -47,57 +55,41 @@
                     <label for="report_time" class="form-label">Time of Day (24-hour format)</label>
                     <input type="time" class="form-control" id="report_time" name="report_time" value="{{ settings.report_time | default('08:00') }}">
                 </div>
+#}
 
                 <button type="submit" class="btn btn-primary">Save Settings</button>
             </form>
         </div>
     </div>
 
-    <div class="card mt-3">
-        <div class="card-body">
-            <h5 class="card-title">Send Report Now</h5>
-            <p class="card-text">Click the button below to immediately send a traffic report to the configured recipients.</p>
-            <form method="POST" action="{{ url_for('email_settings.send_now') }}">
-                <button type="submit" class="btn btn-info">Send Report Now</button>
-            </form>
-        </div>
-    </div>
 
-    <div class="card mt-4">
-        <div class="card-body">
-            <h5 class="card-title">Email Report Preview</h5>
-            <div class="email-preview" style="border: 1px solid #ddd; padding: 15px; background-color: #f9f9f9;">
-                {{ email_preview_html | safe }}
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %}
 
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Email Report Preview (Mock)</h5>
+            <div class="email-preview" style="border: 1px solid #ddd; padding: 15px; background-color: #f9f9f9;">
+                <h1>TRAFx Weekly Summary Report - 2025-11-22</h1>
+                <h2>Site: Example Site A</h2>
+                <table>
+                    <tr><th>Metric</th><th>Value</th></tr>
+                    <tr><td>Average Daily Traffic (ADT)</td><td>123.45</td></tr>
+                    <tr><td>Annualized ADT (ADT x 365)</td><td>45,000.00</td></tr>
+                    <tr><td>Total Days with Data</td><td>30</td></tr>
+                    <tr><td>Total Vehicle Count (YTD)</td><td>15,000</td></tr>
+                </table>
+                <h3>Monthly Totals (2025)</h3>
+                <table>
+                    <tr><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th></tr>
+                    <tr><td>1000</td><td>1200</td><td>1300</td><td>1100</td><td>1500</td><td>1400</td><td>1600</td><td>1700</td><td>1800</td><td>1900</td><td>2000</td><td>2100</td></tr>
+                </table>
+                <br><hr><br>
+                <p>This is a mock preview of the weekly report. The actual report will contain live data.</p>
+            </div>
+        </div>
+    </div>
 {% block scripts %}
 {{ super() }}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const frequencySelect = document.getElementById('report_frequency');
-        const dayOfWeekGroup = document.getElementById('day-of-week-group');
-        const dayOfMonthGroup = document.getElementById('day-of-month-group');
 
-        function toggleGroups() {
-            const selectedFrequency = frequencySelect.value;
-            if (selectedFrequency === 'weekly') {
-                dayOfWeekGroup.style.display = 'block';
-                dayOfMonthGroup.style.display = 'none';
-            } else if (selectedFrequency === 'monthly') {
-                dayOfWeekGroup.style.display = 'none';
-                dayOfMonthGroup.style.display = 'block';
-            } else {
-                dayOfWeekGroup.style.display = 'none';
-                dayOfMonthGroup.style.display = 'none';
-            }
-        }
-
-        toggleGroups(); // Initial check
-        frequencySelect.addEventListener('change', toggleGroups);
-    });
-</script>
 {% endblock %}

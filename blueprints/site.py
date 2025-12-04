@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, current_app
+from blueprints.auth import login_required
 
 site_bp = Blueprint('site', __name__, url_prefix='/site')
 
 @site_bp.route('/<id>')
+@login_required
 def site_detail(id):
     doc_ref = current_app.db.collection(u'stations').document(id)
     site = doc_ref.get()
@@ -31,6 +33,7 @@ def site_detail(id):
                           )
 
 @site_bp.route('/<id>/comments')
+@login_required
 def site_comments(id):
     doc_ref = current_app.db.collection(u'stations').document(id)
     site = doc_ref.get()

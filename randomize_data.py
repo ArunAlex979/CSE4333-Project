@@ -1,12 +1,10 @@
-import json
 import random
 from datetime import date, datetime, timedelta
-from pymongo import MongoClient
+from google.cloud import firestore
 
-# Connect to MongoDB
-client = MongoClient("mongodb+srv://trafx-user:password@trafx.elditss.mongodb.net/?retryWrites=true&w=majority&appName=TRAFx")
-db = client["TRAFX"]
-collection = db["Stations"]
+# Initialize Firestore client
+db = firestore.Client()
+collection = db.collection(u'stations')
 
 def generate_labels_and_current_index(date_increment="bimonthly"):
     labels = []
@@ -38,23 +36,24 @@ def generate_labels_and_current_index(date_increment="bimonthly"):
         for month in range(1, 13):
             # First half of the month
             date1 = date(current_date.year, month, 1)
-            labels.append(f"{date1.day} {date1.strftime('%b')}")
+            labels.append(f"{date1.day} {date1.strftime('%b')})")
             if current_date.month == month and current_date.day < 15:
                 current_index = len(labels) - 1
 
             # Second half of the month
             date2 = date(current_date.year, month, 15)
-            labels.append(f"{date2.day} {date2.strftime('%b')}")
+            labels.append(f"{date2.day} {date2.strftime('%b')})")
             if current_date.month == month and current_date.day >= 15:
                 current_index = len(labels) - 1
     return labels, current_index
 
 def randomize_data():
     # Fetch all sites from the collection
-    sites = list(collection.find())
+    sites = collection.stream()
 
     for site in sites:
-        date_increment = site.get('date_increment', 'bimonthly')
+        site_data = site.to_dict()
+        date_increment = site_data.get('date_increment', 'bimonthly')
         labels, _ = generate_labels_and_current_index(date_increment)
         
         # Generate new random counts
@@ -64,12 +63,12 @@ def randomize_data():
         new_battery_level = random.randint(0, 100)
         
         # Update the site in the database
-        collection.update_one(
-            {'_id': site['_id']},
-            {'$set': {'counts': new_counts, 'battery_level': new_battery_level}}
-        )
+        site.reference.update({
+            'counts': new_counts,
+            'battery_level': new_battery_level
+        })
 
-    print("Data in MongoDB has been randomized according to date increments.")
+    print("Data in Firestore has been randomized according to date increments.")
 
 if __name__ == '__main__':
     randomize_data()

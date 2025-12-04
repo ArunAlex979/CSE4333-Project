@@ -1,11 +1,14 @@
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify, session
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta
+from functools import wraps
+from blueprints.auth import admin_required
 
 manage_bp = Blueprint('manage', __name__, url_prefix='/manage/data')
 
 @manage_bp.route('/')
+@admin_required
 def manage_list():
     stations_ref = current_app.db.collection(u'stations').where(u'deleted', u'!=', True).stream()
     active_sites = []
@@ -16,6 +19,7 @@ def manage_list():
     return render_template('manage_list.html', sites=active_sites)
 
 @manage_bp.route('/trash')
+@admin_required
 def manage_trash():
     stations_ref = current_app.db.collection(u'stations').where(u'deleted', u'==', True).stream()
     deleted_sites = []
@@ -26,6 +30,7 @@ def manage_trash():
     return render_template('manage_trash.html', sites=deleted_sites)
 
 @manage_bp.route('/add', methods=['GET', 'POST'])
+@admin_required
 def manage_add():
     if request.method == 'POST':
         try:
@@ -83,7 +88,7 @@ def manage_add():
         "name": "New Site",
         "counts": [0]*24,
         "start_date": datetime.now().strftime('%Y-%m-%d'),
-        "end_date": (datetime.now().replace(month=12, day=15)).strftime('%Y-%m-%d'),
+        "end_date": (datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d'),
         "latitude": "",
         "longitude": "",
         "site_comments": "",
@@ -94,6 +99,7 @@ def manage_add():
     return render_template('manage_add.html', site=default_site, labels=labels, current_index=current_index)
 
 @manage_bp.route('/<id>/edit', methods=['GET', 'POST'])
+@admin_required
 def manage_edit(id):
     doc_ref = current_app.db.collection(u'stations').document(id)
     site = doc_ref.get()
@@ -156,6 +162,7 @@ def manage_edit(id):
     return render_template('manage_edit.html', site=site, labels=labels, current_index=current_index, id=id)
 
 @manage_bp.route('/<id>/delete', methods=['POST'])
+@admin_required
 def manage_delete(id):
     try:
         doc_ref = current_app.db.collection(u'stations').document(id)
@@ -166,6 +173,7 @@ def manage_delete(id):
     return redirect(url_for('manage.manage_list'))
 
 @manage_bp.route('/<id>/restore', methods=['POST'])
+@admin_required
 def manage_restore(id):
     try:
         doc_ref = current_app.db.collection(u'stations').document(id)
@@ -178,11 +186,13 @@ def manage_restore(id):
 
 
 @manage_bp.route('/get_labels_and_index/<date_increment>')
+@admin_required
 def get_labels_and_index(date_increment):
     labels, current_index, _ = current_app.generate_labels_and_current_index(date_increment)
     return jsonify(labels=labels, current_index=current_index)
 
 @manage_bp.route('/reset-future-counts', methods=['POST'])
+@admin_required
 def reset_future_counts():
     try:
         stations_ref = current_app.db.collection(u'stations').where(u'deleted', u'!=', True).stream()

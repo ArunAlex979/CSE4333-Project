@@ -3,6 +3,15 @@
 {% block content %}
 <h1>Device Logs</h1>
 
+<div class="form-group">
+    <label for="timezone-select">Timezone:</label>
+    <select class="form-control" id="timezone-select">
+        {% for tz in timezones %}
+            <option value="{{ tz }}" {% if tz == current_timezone %}selected{% endif %}>{{ tz }}</option>
+        {% endfor %}
+    </select>
+</div>
+
 <table class="table table-striped">
     <thead>
         <tr>
@@ -12,25 +21,52 @@
             <th>Details</th>
         </tr>
     </thead>
-    <tbody>
-        {% for log in logs %}
-        <tr>
-            <td>{{ log.timestamp }}</td>
-            <td>{{ log.station_name }}</td>
-            <td>{{ log.event_type }}</td>
-            <td>
-                {% if log.event_type == 'vehicle_event' %}
-                    Vehicle Count Increment: {{ log.details.vehicle_count_increment }}<br>
-                    Current Total Count: {{ log.details.current_total_count }}
-                {% elif log.event_type == 'reboot' %}
-                    Device Rebooted
-                {% else %}
-                    N/A
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
+    <tbody id="logs-tbody">
+        <!-- Log data will be inserted here by JavaScript -->
     </tbody>
 </table>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const timezoneSelect = document.getElementById('timezone-select');
+        const logsTbody = document.getElementById('logs-tbody');
+
+        function fetchLogs(timezone) {
+            fetch(`/api/logs?timezone=${timezone}`)
+                .then(response => response.json())
+                .then(data => {
+                    logsTbody.innerHTML = ''; // Clear existing logs
+                    data.forEach(log => {
+                        const row = document.createElement('tr');
+                        let details = '';
+                        if (log.event_type === 'vehicle_event') {
+                            details = `Vehicle Count Increment: ${log.details.vehicle_count_increment}<br>Current Total Count: ${log.details.current_total_count}`;
+                        } else if (log.event_type === 'reboot') {
+                            details = 'Device Rebooted';
+                        } else {
+                            details = 'N/A';
+                        }
+
+                        row.innerHTML = `
+                            <td>${log.timestamp} <span class="timezone">${log.timezone}</span></td>
+                            <td>${log.station_name}</td>
+                            <td>${log.event_type}</td>
+                            <td>${details}</td>
+                        `;
+                        logsTbody.appendChild(row);
+                    });
+                });
+        }
+
+        timezoneSelect.addEventListener('change', function() {
+            fetchLogs(this.value);
+        });
+
+        // Initial load
+        fetchLogs(timezoneSelect.value);
+    });
+</script>
 {% endblock %}

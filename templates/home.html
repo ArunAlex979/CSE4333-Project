@@ -2,6 +2,7 @@
 
 {% block content %}
 <h1>Home</h1>
+<div id="last-event-time"></div>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -23,6 +24,8 @@
                         <div class="battery-bar" style="width: {{ site.battery_level }}%; background-color: {{ 'green' if site.battery_level > 50 else ('orange' if site.battery_level > 20 else 'red') }};"></div>
                     </div>
                 </div>
+                <div>Last Reboot: <span id="last-reboot-{{ site.id }}"></span></div>
+                <div>Last Count Increment: <span id="last-count-increment-{{ site.id }}"></span></div>
             </td>
             <td><canvas id="sparkline-{{ site.id }}"></canvas></td>
             <td>
@@ -33,8 +36,14 @@
     </tbody>
 </table>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
 <script>
     const sites = {{ sites | tojson }};
+    const lastEvent = {{ last_event | tojson }};
     const currentYear = new Date().getFullYear();
 
     function dateToIndex(dateStr, labels) {
@@ -110,11 +119,41 @@
         });
     }
 
+    function updateLastEventTime() {
+        const lastEventTimeDiv = document.getElementById('last-event-time');
+        if (lastEvent && lastEvent.timestamp) {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const lastEventTimestamp = moment(lastEvent.timestamp).tz(timezone).format('YYYY-MM-DD hh:mm:ss A');
+            lastEventTimeDiv.innerHTML = `Last event: ${lastEventTimestamp}`;
+        }
+    }
+
+    function updateSiteTimestamps() {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        sites.forEach(site => {
+            const lastRebootSpan = document.getElementById(`last-reboot-${site.id}`);
+            if (lastRebootSpan && site.last_reboot_time) {
+                lastRebootSpan.innerHTML = moment(site.last_reboot_time).tz(timezone).format('YYYY-MM-DD hh:mm:ss A');
+            } else if (lastRebootSpan) {
+                lastRebootSpan.innerHTML = "N/A";
+            }
+
+            const lastCountIncrementSpan = document.getElementById(`last-count-increment-${site.id}`);
+            if (lastCountIncrementSpan && site.last_vehicle_event_time) {
+                lastCountIncrementSpan.innerHTML = `${site.last_vehicle_count_increment} at ${moment(site.last_vehicle_event_time).tz(timezone).format('YYYY-MM-DD hh:mm:ss A')}`;
+            } else if (lastCountIncrementSpan) {
+                lastCountIncrementSpan.innerHTML = "N/A";
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         drawSparklines();
         setupCommentToggles();
         updateCountdown();
         setInterval(updateCountdown, 1000);
+        updateLastEventTime();
+        updateSiteTimestamps();
     });
 </script>
 {% endblock %}

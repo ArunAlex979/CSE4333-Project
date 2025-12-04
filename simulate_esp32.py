@@ -5,7 +5,7 @@ import json
 # Replace with the URL of your deployed application
 BASE_URL = "https://trafxcloud.uc.r.appspot.com"
 # Replace with a valid station ID from your database
-STATION_ID = "kqxhEQMyv1UKJAlSHkN3"
+STATION_ID = "BnVXD5mosCFRdxINF7Tt"
 # ---------------------
 
 def record_vehicle_event(vehicle_count):
@@ -43,7 +43,7 @@ def reboot():
 
 if __name__ == "__main__":
     # --- Simulate a vehicle event ---
-    record_vehicle_event(1)
+    record_vehicle_event(28)
 
     # --- Simulate a reboot event ---
-    # reboot()
+     #reboot()

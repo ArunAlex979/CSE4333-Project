@@ -1,5 +1,6 @@
 import email_service
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
+from blueprints.auth import admin_required
 
 email_settings_bp = Blueprint('email_settings', __name__, url_prefix='/email-settings')
 
@@ -7,6 +8,7 @@ email_settings_bp = Blueprint('email_settings', __name__, url_prefix='/email-set
 SETTINGS_DOC_ID = 'settings'
 
 @email_settings_bp.route('/', methods=['GET', 'POST'])
+@admin_required
 def settings():
     settings_ref = current_app.db.collection(u'email_settings').document(SETTINGS_DOC_ID)
     
@@ -50,9 +52,6 @@ def settings():
             for email in recipient_emails:
                 email_service.send_email(subject, body, email)
             
-            # Re-initialize the scheduler with the new frequency
-            email_service.init_scheduler(current_app) # This will restart the scheduler with the new interval
-
         return redirect(url_for('email_settings.settings'))
     else: # GET request
         current_settings = settings_ref.get()
@@ -64,18 +63,5 @@ def settings():
             }
         else:
             current_settings = current_settings.to_dict()
-        
-        # Generate email preview
-        email_preview_html = email_service.generate_weekly_report_html(current_app)
             
-        return render_template('email_settings.html', settings=current_settings, email_preview_html=email_preview_html)
-
-@email_settings_bp.route('/send-now', methods=['POST'])
-def send_now():
-    from email_service import generate_weekly_report
-    try:
-        generate_weekly_report(current_app)
-        flash('Test email sent successfully!', 'success')
-    except Exception as e:
-        flash(f'Failed to send test email: {e}', 'error')
-    return redirect(url_for('email_settings.settings'))
+        return render_template('email_settings.html', settings=current_settings)

@@ -5,7 +5,7 @@ from pymongo import MongoClient
 
 # --- Configuration ---
 # Make sure these match your settings in app.py
-MONGO_URI = "mongodb+srv://trafx-user:Password@trafx.elditss.mongodb.net/?retryWrites=true&w=majority&appName=TRAFx"
+MONGO_URI = "mongodb+srv://trafx-user:YXPa0VcQBVYQTI0I@trafx.elditss.mongodb.net/?retryWrites=true&w=majority&appName=TRAFx"
 DB_NAME = "TRAFX"
 COLLECTION_NAME = "Station"
 JSON_FILE_PATH = "data.json"

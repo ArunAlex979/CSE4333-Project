@@ -2,7 +2,7 @@ runtime: python312
 entrypoint: gunicorn -b :$PORT app:app
 
 env_variables:
-  SENDGRID_API_KEY: 'was to chnage HIDDEN_FOR_SECURITY API KEY'
+  SENDGRID_API_KEY: 'projects/trafxcloud/secrets/sendgrid-api-key/versions/latest'
 
 handlers:
 - url: /static

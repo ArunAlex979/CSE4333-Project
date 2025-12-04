@@ -34,7 +34,7 @@ To run the application locally, you will need to have Python and `pip` installed
 3.  **Set up your environment variables:**
     *   You will need to set up a service account in your Google Cloud project and download the JSON key file.
     *   Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of your JSON key file.
-    *   Set the `SENDGRID_API_KEY` environment variable to your SendGrid API key.
+
 4.  **Run the application:**
     ```bash
     python app.py

@@ -2,42 +2,43 @@
 
 {% block content %}
     <h1>Master Summary</h1>
-    <table class="table table-striped table-bordered">
-        <thead class="thead-dark">
-            <tr>
-                <th>Year</th>
-                <th>Site</th>
-                <th>Jan</th>
-                <th>Feb</th>
-                <th>Mar</th>
-                <th>Apr</th>
-                <th>May</th>
-                <th>Jun</th>
-                <th>Jul</th>
-                <th>Aug</th>
-                <th>Sep</th>
-                <th>Oct</th>
-                <th>Nov</th>
-                <th>Dec</th>
-                <th>ADT†</th>
-                <th>ADT†x365</th>
-                <th>Days with Data</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for data in summary_data %}
-            <tr>
-                <td>{{ year }}</td>
-                <td>{{ data.site_name }}</td>
-                {% for total in data.monthly_totals %}
-                <td>{{ total }}</td>
+    {% for year, summary_data in summary_data_by_year.items() %}
+        <h2>{{ year }}</h2>
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Site</th>
+                    <th>Jan</th>
+                    <th>Feb</th>
+                    <th>Mar</th>
+                    <th>Apr</th>
+                    <th>May</th>
+                    <th>Jun</th>
+                    <th>Jul</th>
+                    <th>Aug</th>
+                    <th>Sep</th>
+                    <th>Oct</th>
+                    <th>Nov</th>
+                    <th>Dec</th>
+                    <th>ADT†</th>
+                    <th>ADT†x365</th>
+                    <th>Days with Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in summary_data %}
+                <tr>
+                    <td>{{ data.site_name }}</td>
+                    {% for total in data.monthly_totals %}
+                    <td>{{ total }}</td>
+                    {% endfor %}
+                    <td>{{ data.adt }}</td>
+                    <td>{{ data.adt_x_365 }}</td>
+                    <td>{{ data.days_with_data }}</td>
+                </tr>
                 {% endfor %}
-                <td>{{ data.adt }}</td>
-                <td>{{ data.adt_x_365 }}</td>
-                <td>{{ data.days_with_data }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <p><small>† ADT = Average Daily Traffic (Total Yearly Counts / 365)</small></p>
+            </tbody>
+        </table>
+    {% endfor %}
+    <p><small>† ADT = Average Daily Traffic (Total Yearly Counts / Days with Data)</small></p>
 {% endblock %}
