@@ -70,6 +70,91 @@ The application exposes the following API endpoints for interacting with the ESP
         }
         ```
 
+## ESP32 Firmware Development
+
+The `trafx_esp32` directory contains the firmware for the ESP32 devices. To build and flash the firmware, you will need to install the ESP-IDF (Espressif IoT Development Framework).
+
+### Prerequisites
+
+*   **Python:** Version 3.8 or later. Ensure it's added to your system's PATH.
+*   **Git:** For cloning the ESP-IDF repository.
+*   **Serial Drivers:** Install the necessary USB-to-UART bridge drivers for your ESP32 board (e.g., CP210x or FTDI drivers).
+
+### Installing ESP-IDF
+
+1.  **Clone the ESP-IDF repository:**
+    It's recommended to clone it into a directory without spaces in its path.
+
+    ```bash
+    mkdir -p ~/esp
+    cd ~/esp
+    git clone --recursive https://github.com/espressif/esp-idf.git
+    ```
+
+2.  **Install the ESP-IDF Tools:**
+    Navigate into the `esp-idf` directory and run the installation script.
+
+    *   **Linux/macOS:**
+        ```bash
+        cd esp-idf
+        ./install.sh
+        ```
+    *   **Windows (PowerShell):**
+        ```powershell
+        cd esp-idf
+        .\install.ps1
+        ```
+
+3.  **Set up Environment Variables:**
+    You need to set up the ESP-IDF environment variables in each new terminal session.
+
+    *   **Linux/macOS:**
+        ```bash
+        . $HOME/esp/esp-idf/export.sh
+        ```
+    *   **Windows (PowerShell):
+        ```powershell
+        . $HOME/esp/esp-idf/export.ps1
+        ```
+    For convenience, you can add this command to your shell's profile file (e.g., `.bashrc`, `.zshrc`, or PowerShell profile) to have it run automatically.
+
+### Building and Flashing
+
+1.  **Navigate to the firmware directory:**
+    ```bash
+    cd trafx_esp32
+    ```
+
+2.  **Set the Target Chip:**
+    ```bash
+    idf.py set-target esp32
+    ```
+
+3.  **Configure Your Project (Optional):**
+    This command opens a menu-based configuration utility.
+
+    ```bash
+    idf.py menuconfig
+    ```
+
+4.  **Build the Project:**
+    ```bash
+    idf.py build
+    ```
+
+5.  **Flash the Project to ESP32:**
+    Replace `<PORT>` with the actual serial port of your ESP32 (e.g., `COM3` on Windows, `/dev/ttyUSB0` on Linux/macOS).
+
+    ```bash
+    idf.py -p <PORT> flash
+    ```
+
+6.  **Monitor Serial Output:**
+    ```bash
+    idf.py -p <PORT> monitor
+    ```
+    To exit the monitor, press `Ctrl+]`.
+
 ## ESP32 Simulation
 
 The `simulate_esp32.py` script can be used to simulate an ESP32 device sending data to the application.
